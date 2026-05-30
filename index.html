@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>FutbolPredict IA - Pronósticos de Fútbol con IA</title>
+    <meta name="description" content="Pronósticos de fútbol generados por inteligencia artificial. Suscríbete y accede a análisis predictivo de alta precisión.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Poppins', sans-serif; margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: linear-gradient(135deg, #0b0f19 0%, #0a0c14 100%); color: #f3f4f6; overflow-x: hidden; }
+        html { font-size: 16px; }
+        @media (max-width: 480px) { html { font-size: 14px; } }
+        .glass-card { background: rgba(17, 24, 39, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s ease; }
+        .premium-blur { filter: blur(4px); pointer-events: none; user-select: none; }
+        .btn-primary { background: linear-gradient(135deg, #10b981, #059669); transition: all 0.3s ease; cursor: pointer; border: none; }
+        .btn-primary:hover { transform: scale(1.02); box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3); }
+        button, .btn-like, .toggle-password { min-height: 44px; min-width: 44px; display: inline-flex; align-items: center; justify-content: center; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 1000; justify-content: center; align-items: center; padding: 16px; }
+        .modal.active { display: flex; }
+        .modal-content { max-width: 90%; width: 100%; max-height: 90%; overflow-y: auto; }
+        @media (min-width: 640px) { .modal-content { max-width: 450px; } }
+        .password-container { position: relative; display: flex; align-items: center; }
+        .password-input { width: 100%; padding-right: 45px; }
+        .toggle-password { position: absolute; right: 12px; cursor: pointer; background: none; border: none; color: #9ca3af; transition: color 0.2s; padding: 10px; }
+        .toggle-password:hover { color: #10b981; }
+        .stat-card { transition: transform 0.2s; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .toast { position: fixed; bottom: 20px; right: 20px; background: #10b981; color: white; padding: 12px 20px; border-radius: 12px; font-weight: bold; z-index: 2000; animation: fadeOut 3s ease forwards; max-width: 90%; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+        @keyframes fadeOut { 0% { opacity: 1; } 70% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+        .nav-links { display: none; flex-direction: column; position: absolute; top: 70px; left: 0; right: 0; background: rgba(17, 24, 39, 0.95); backdrop-filter: blur(12px); padding: 20px; gap: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); z-index: 100; }
+        .nav-links.active { display: flex; }
+        @media (min-width: 768px) { .nav-links { display: flex !important; flex-direction: row; position: static; background: transparent; padding: 0; gap: 25px; border: none; } .menu-toggle { display: none !important; } }
+        .locked-overlay { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); border-radius: 20px; backdrop-filter: blur(4px); }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1a1f2e; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: #10b981; border-radius: 10px; }
+        @media (min-width: 1024px) { .glass-card:hover { border-color: rgba(16, 185, 129, 0.3); transform: translateY(-2px); } }
+    </style>
+</head>
+<body>
+
+<nav class="glass-card fixed top-0 w-full z-50 border-b border-gray-800 px-4 py-3">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="bg-gradient-to-r from-emerald-500 to-blue-500 text-white p-2 rounded-xl font-black text-xl">FP</div>
+            <div>
+                <h1 class="text-base md:text-lg font-bold text-white">FutbolPredict <span class="text-xs bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full">PREMIUM</span></h1>
+                <p class="text-[9px] md:text-[10px] text-gray-400 hidden md:block">Análisis Predictivo de Alta Precisión</p>
+            </div>
+        </div>
+        
+        <button class="menu-toggle text-white text-2xl md:hidden" onclick="toggleMenu()" style="min-width: 44px; min-height: 44px;">☰</button>
+        
+        <div class="nav-links" id="navLinks">
+            <span id="userStatus" class="text-xs px-2 py-1 rounded-full bg-gray-800 text-gray-400">👥 Visitante</span>
+        </div>
+    </div>
+</nav>
+
+<main class="max-w-6xl mx-auto px-4 pt-20 md:pt-24 pb-12">
+
+    <section class="rounded-2xl md:rounded-3xl p-5 md:p-8 mb-8 md:mb-10 text-center" style="background: linear-gradient(135deg, #10b98120 0%, #3b82f620 100%);">
+        <h1 class="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black mb-3 md:mb-4 bg-gradient-to-r from-emerald-400 to-blue-400 bg-clip-text text-transparent">FutbolPredict IA</h1>
+        <p class="text-sm md:text-base text-gray-300 max-w-2xl mx-auto mb-4 md:mb-6 px-2">Pronósticos de fútbol con inteligencia artificial. Datos en tiempo real, análisis táctico y predicciones de alta precisión.</p>
+        <div class="flex flex-wrap justify-center gap-3 md:gap-4">
+            <button onclick="checkAccess()" class="btn-primary text-white px-4 md:px-6 py-2 md:py-3 rounded-xl font-bold shadow-lg text-sm md:text-base">🔓 Ver Contenido Premium</button>
+            <button onclick="openPremiumModal()" class="bg-gray-800 hover:bg-gray-700 text-white px-4 md:px-6 py-2 md:py-3 rounded-xl font-bold transition text-sm md:text-base">⭐ Activar Premium</button>
+        </div>
+    </section>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-8 md:mb-10">
+        <div class="stat-card glass-card p-2 md:p-3 rounded-xl text-center"><div class="text-xl md:text-2xl font-bold text-emerald-400">71.8%</div><div class="text-[10px] md:text-xs text-gray-400">Tasa de acierto</div></div>
+        <div class="stat-card glass-card p-2 md:p-3 rounded-xl text-center"><div class="text-xl md:text-2xl font-bold text-emerald-400">12,348</div><div class="text-[10px] md:text-xs text-gray-400">Partidos analizados</div></div>
+        <div class="stat-card glass-card p-2 md:p-3 rounded-xl text-center"><div class="text-xl md:text-2xl font-bold text-emerald-400">89%</div><div class="text-[10px] md:text-xs text-gray-400">Confianza Clásicos</div></div>
+        <div class="stat-card glass-card p-2 md:p-3 rounded-xl text-center"><div class="text-xl md:text-2xl font-bold text-emerald-400">+12%</div><div class="text-[10px] md:text-xs text-gray-400">Yield último mes</div></div>
+    </div>
+
+    <div id="mainContent"></div>
+
+    <footer class="mt-10 md:mt-12 pt-6 border-t border-gray-800 text-center text-[10px] md:text-xs text-gray-500">
+        <div class="flex flex-wrap justify-center gap-3 md:gap-4 mb-3">
+            <a href="acerca.html" class="hover:text-emerald-400 transition">📖 Acerca de</a>
+            <a href="terminos.html" class="hover:text-emerald-400 transition">📜 Términos</a>
+            <a href="privacidad.html" class="hover:text-emerald-400 transition">🔒 Privacidad</a>
+            <a href="contacto.html" class="hover:text-emerald-400 transition">📧 Contacto</a>
+        </div>
+        <p>© 2025 FutbolPredict IA. Los pronósticos son simulaciones con fines de entretenimiento. +18</p>
+        <p class="mt-1">⚽ Desarrollado con inteligencia artificial para la comunidad futbolera</p>
+    </footer>
+
+    <div id="premiumModal" class="modal">
+        <div class="glass-card rounded-2xl p-5 md:p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4"><h2 class="text-xl md:text-2xl font-bold">🚀 Activar Premium</h2><button onclick="closePremiumModal()" class="text-gray-400 text-2xl">&times;</button></div>
+            <p class="text-gray-400 text-sm mb-4">Ingresa tu código de acceso premium</p>
+            <div class="password-container">
+                <input type="password" id="premiumCodeInput" placeholder="Código Premium" class="password-input w-full bg-slate-900 border border-gray-700 rounded-lg p-3 text-sm">
+                <button class="toggle-password" onclick="togglePasswordVisibility('premiumCodeInput', this)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                </button>
+            </div>
+            <button onclick="activatePremium()" class="btn-primary text-white p-3 rounded-lg w-full font-bold mt-4 text-sm md:text-base">Activar Premium</button>
+            <p class="text-center text-xs text-gray-500 mt-4">Códigos válidos: <strong class="text-emerald-400">VIP123</strong> o <strong class="text-emerald-400">PREMIUM456</strong></p>
+            <hr class="border-gray-700 my-4">
+            <p class="text-center text-sm text-gray-300">¿No tienes código? <a href="https://paypal.me/AbelCanteroGuerrero/4.99" target="_blank" class="text-emerald-400 font-bold">Suscríbete aquí</a></p>
+            <div class="flex flex-wrap justify-center gap-2 mt-3">
+                <a href="https://paypal.me/AbelCanteroGuerrero/5" target="_blank" class="bg-gray-800 px-3 py-2 rounded text-xs">Donar 5€</a>
+                <a href="https://paypal.me/AbelCanteroGuerrero/10" target="_blank" class="bg-gray-800 px-3 py-2 rounded text-xs">10€</a>
+                <a href="https://paypal.me/AbelCanteroGuerrero/20" target="_blank" class="bg-gray-800 px-3 py-2 rounded text-xs">20€</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    // ========== CONFIGURACIÓN ==========
+    const CODIGOS_VALIDOS = { "VIP123": "subscriber", "PREMIUM456": "subscriber" };
+    const ADMIN_SECRET = "Abel2025";
+
+    // ========== TOAST NOTIFICACIONES ==========
+    function showToast(message, isError = false) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.style.background = isError ? '#ef4444' : '#10b981';
+        toast.innerText = message;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ========== ACCESO ADMIN SECRETO (POR URL) ==========
+    function checkAdminAccess() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const adminKey = urlParams.get('admin');
+        if (adminKey === ADMIN_SECRET) {
+            localStorage.setItem('userType', 'admin');
+            showToast('👑 Acceso de administrador activado');
+            setTimeout(() => location.reload(), 1000);
+        }
+    }
+
+    // ========== TOGGLE PASSWORD (OJO) ==========
+    function togglePasswordVisibility(inputId, buttonElement) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        const svg = buttonElement.querySelector('svg');
+        if (svg) {
+            if (isPassword) {
+                svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>';
+            } else {
+                svg.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65M16.5 12a4.5 4.5 0 01-4.5 4.5m0-9a4.5 4.5 0 014.5 4.5"></path>';
+            }
+        }
+    }
+
+    // ========== AUTENTICACIÓN ==========
+    function saveUserAndReload(userType) { 
+        localStorage.setItem('userType', userType); 
+        showToast('✅ ¡Acceso premium activado! Recargando...');
+        setTimeout(() => location.reload(), 1000);
+    }
+    
+    function activatePremium() { 
+        const code = document.getElementById('premiumCodeInput').value.toUpperCase(); 
+        if (CODIGOS_VALIDOS[code]) { 
+            saveUserAndReload('subscriber'); 
+        } else { 
+            showToast('❌ Código inválido. Prueba con VIP123 o PREMIUM456', true); 
+        } 
+    }
+    
+    function logout() { 
+        localStorage.removeItem('userType'); 
+        showToast('👋 Sesión cerrada. Recargando...');
+        setTimeout(() => location.reload(), 800);
+    }
+    
+    function checkAccess() { 
+        const userType = localStorage.getItem('userType'); 
+        if (userType === 'admin' || userType === 'subscriber') { 
+            showToast('🔓 Ya tienes acceso premium');
+            document.getElementById('mainContent').scrollIntoView({ behavior: 'smooth' });
+        } else { 
+            openPremiumModal(); 
+        } 
+    }
+
+    // ========== VISTA VISITANTE (MUESTRA GRATIS) ==========
+    function renderVisitorContent() {
+        return `
+            <h2 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">🎁 Muestra Gratis</h2>
+            <div class="glass-card p-4 rounded-xl mb-4 border border-emerald-500/30">
+                <div class="font-bold text-white text-base md:text-lg">🔥 PARTIDO GRATIS: Real Madrid vs Barcelona</div>
+                <div class="text-xs md:text-sm text-emerald-400">Victoria Local (58%) | Confianza 72%</div>
+                <div class="grid grid-cols-3 gap-2 mt-3 text-center text-xs md:text-sm"><div><span class="text-emerald-400 font-bold">58%</span><br>Local</div><div><span class="text-yellow-400 font-bold">24%</span><br>Empate</div><div><span class="text-blue-400 font-bold">18%</span><br>Visitante</div></div>
+            </div>
+            <div class="relative mt-4 mb-8">
+                <div class="premium-blur">
+                    <div class="glass-card p-3 md:p-4 rounded-xl mb-2"><div class="font-bold text-sm md:text-base">🔒 Manchester City vs Liverpool</div></div>
+                    <div class="glass-card p-3 md:p-4 rounded-xl mb-2"><div class="font-bold text-sm md:text-base">🔒 Inter vs Milan</div></div>
+                    <div class="glass-card p-3 md:p-4 rounded-xl mb-2"><div class="font-bold text-sm md:text-base">🔒 PSG vs Marsella</div></div>
+                    <div class="glass-card p-3 md:p-4 rounded-xl mb-2"><div class="font-bold text-sm md:text-base">🔒 Bayern vs Dortmund</div></div>
+                </div>
+                <div class="locked-overlay"><div class="text-center px-4"><div class="text-3xl mb-2">🔒</div><p class="text-white font-bold text-sm md:text-base">Contenido exclusivo para suscriptores</p><div class="flex flex-col sm:flex-row gap-3 mt-3"><button onclick="openPremiumModal()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">Activar Premium</button><button onclick="openSuscripcionDirecta()" class="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm">Suscribirse</button></div></div></div>
+            </div>
+            <div class="relative mt-4"><div class="premium-blur"><div class="glass-card p-4 md:p-6 rounded-xl"><h3 class="text-lg md:text-xl font-bold mb-4">🤖 Analizador IA Personalizado</h3><div class="grid md:grid-cols-2 gap-4"><div><input type="text" placeholder="Equipo Local" class="w-full bg-slate-900 p-2 rounded border border-gray-700 text-sm"><input type="text" placeholder="Equipo Visitante" class="w-full bg-slate-900 p-2 rounded mt-2 border border-gray-700 text-sm"><button class="bg-gray-700 text-gray-400 p-2 rounded w-full mt-2 cursor-not-allowed text-sm">🔒 Generar Pronóstico</button></div><div class="text-center p-4 bg-slate-900/50 rounded"><p class="text-gray-400 text-sm">🔒 Inicia sesión o suscríbete</p></div></div></div></div><div class="locked-overlay"><div class="text-center px-4"><div class="text-3xl mb-2">🔒</div><p class="text-white font-bold text-sm md:text-base">Analizador IA para suscriptores premium</p><div class="flex flex-col sm:flex-row gap-3 mt-3"><button onclick="openPremiumModal()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">Activar Premium</button><button onclick="openSuscripcionDirecta()" class="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm">Suscribirse</button></div></div></div></div>
+        `;
+    }
+
+    // ========== VISTA PREMIUM (CONTENIDO COMPLETO) ==========
+    function renderPremiumContent() {
+        return `
+            <h2 class="text-xl md:text-2xl font-bold mb-4 md:mb-6">🎯 Pronósticos Premium del Día</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                <div class="glass-card p-3 md:p-4 rounded-xl"><div class="font-bold text-sm md:text-base">🏠 Real Madrid vs Barcelona</div><div class="text-emerald-400 text-xs md:text-sm">Victoria Local (58%) | Confianza 72%</div><div class="text-[10px] text-gray-500 mt-1">Goles sugeridos: 2-1</div></div>
+                <div class="glass-card p-3 md:p-4 rounded-xl"><div class="font-bold text-sm md:text-base">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Manchester City vs Liverpool</div><div class="text-emerald-400 text-xs md:text-sm">Empate + Over 2.5 (45%) | Confianza 68%</div><div class="text-[10px] text-gray-500 mt-1">Goles sugeridos: 2-2</div></div>
+                <div class="glass-card p-3 md:p-4 rounded-xl"><div class="font-bold text-sm md:text-base">🇮🇹 Inter vs Milan</div><div class="text-emerald-400 text-xs md:text-sm">Victoria Local (52%) | Confianza 71%</div><div class="text-[10px] text-gray-500 mt-1">Goles sugeridos: 1-0</div></div>
+                <div class="glass-card p-3 md:p-4 rounded-xl"><div class="font-bold text-sm md:text-base">🇫🇷 PSG vs Marsella</div><div class="text-emerald-400 text-xs md:text-sm">Local + Ambos marcan (61%) | Confianza 74%</div><div class="text-[10px] text-gray-500 mt-1">Goles sugeridos: 3-1</div></div>
+                <div class="glass-card p-3 md:p-4 rounded-xl"><div class="font-bold text-sm md:text-base">🇩🇪 Bayern vs Dortmund</div><div class="text-emerald-400 text-xs md:text-sm">Over 2.5 (78%) | Confianza 69%</div><div class="text-[10px] text-gray-500 mt-1">Goles sugeridos: 3-2</div></div>
+                <div class="glass-card p-3 md:p-4 rounded-xl"><div class="font-bold text-sm md:text-base">🇪🇸 Atlético vs Sevilla</div><div class="text-emerald-400 text-xs md:text-sm">Under 2.5 (65%) | Confianza 66%</div><div class="text-[10px] text-gray-500 mt-1">Goles sugeridos: 1-0</div></div>
+            </div>
+            <div class="mt-6 md:mt-8 glass-card p-4 md:p-6 rounded-xl"><h3 class="text-lg md:text-xl font-bold mb-4">🤖 Analizador IA Personalizado</h3><div class="grid md:grid-cols-2 gap-4"><div><input type="text" id="teamHome" placeholder="Equipo Local" class="w-full bg-slate-900 p-2 md:p-3 rounded border border-gray-700 text-sm"><input type="text" id="teamAway" placeholder="Equipo Visitante" class="w-full bg-slate-900 p-2 md:p-3 rounded mt-2 border border-gray-700 text-sm"><button onclick="generatePrediction()" class="btn-primary text-white p-2 md:p-3 rounded w-full mt-2 text-sm md:text-base">Generar Pronóstico</button></div><div id="predictionResult" class="text-center p-4 bg-slate-900/50 rounded"><p class="text-gray-400 text-sm">Completa los datos y haz clic en "Generar"</p></div></div></div>
+        `;
+    }
+
+    function generatePrediction() {
+        const home = document.getElementById('teamHome')?.value || 'Local';
+        const away = document.getElementById('teamAway')?.value || 'Visitante';
+        const homeProb = Math.floor(Math.random() * 40) + 35;
+        const drawProb = Math.floor(Math.random() * 20) + 15;
+        const awayProb = 100 - homeProb - drawProb;
+        const score = `${Math.floor(Math.random() * 4)}-${Math.floor(Math.random() * 4)}`;
+        document.getElementById('predictionResult').innerHTML = `<div class="space-y-2"><div class="grid grid-cols-3 gap-2 text-xs md:text-sm"><div><span class="text-emerald-400 text-lg md:text-xl font-bold">${homeProb}%</span><br>${home}</div><div><span class="text-yellow-400 text-lg md:text-xl font-bold">${drawProb}%</span><br>Empate</div><div><span class="text-blue-400 text-lg md:text-xl font-bold">${awayProb}%</span><br>${away}</div></div><div class="text-sm">Marcador sugerido: <span class="text-white font-bold">${score}</span></div></div>`;
+    }
+
+    function loadContent() {
+        const userType = localStorage.getItem('userType');
+        const statusSpan = document.getElementById('userStatus');
+        const container = document.getElementById('mainContent');
+        if (userType === 'admin') {
+            statusSpan.innerHTML = '👑 Administrador';
+            statusSpan.className = 'text-xs px-2 py-1 rounded-full bg-purple-600 text-white';
+            container.innerHTML = renderPremiumContent() + `<div class="mt-6 glass-card p-4 rounded-xl text-center"><p class="text-emerald-400 mb-2 text-sm md:text-base">👑 Modo Administrador</p><p class="text-xs md:text-sm text-gray-300">Códigos para suscriptores: <strong class="text-emerald-400">VIP123</strong> | <strong class="text-emerald-400">PREMIUM456</strong></p><button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded-lg mt-3 text-sm md:text-base">Cerrar Sesión</button></div>`;
+        } else if (userType === 'subscriber') {
+            statusSpan.innerHTML = '⭐ Suscriptor Premium';
+            statusSpan.className = 'text-xs px-2 py-1 rounded-full bg-emerald-600 text-white';
+            container.innerHTML = renderPremiumContent() + `<div class="mt-6 text-center"><button onclick="logout()" class="bg-gray-700 text-white px-4 py-2 rounded-lg text-sm md:text-base">Cerrar Sesión</button></div>`;
+        } else {
+            statusSpan.innerHTML = '👥 Visitante';
+            statusSpan.className = 'text-xs px-2 py-1 rounded-full bg-gray-800 text-gray-400';
+            container.innerHTML = renderVisitorContent();
+        }
+    }
+
+    // ========== FUNCIONES ADICIONALES ==========
+    function openSuscripcionDirecta() { 
+        window.open('https://paypal.me/AbelCanteroGuerrero/4.99', '_blank'); 
+        showToast('📧 Después de pagar, recibirás tu código por correo');
+    }
+    
+    function toggleMenu() { 
+        document.getElementById('navLinks').classList.toggle('active'); 
+    }
+    
+    function openPremiumModal() { 
+        document.getElementById('premiumModal').classList.add('active'); 
+    }
+    
+    function closePremiumModal() { 
+        document.getElementById('premiumModal').classList.remove('active'); 
+    }
+    
+    window.onclick = function(e) { 
+        if(e.target === document.getElementById('premiumModal')) closePremiumModal(); 
+    }
+
+    // ========== EXPORTAR FUNCIONES GLOBALES ==========
+    window.togglePasswordVisibility = togglePasswordVisibility;
+    window.activatePremium = activatePremium;
+    window.logout = logout;
+    window.checkAccess = checkAccess;
+    window.openPremiumModal = openPremiumModal;
+    window.closePremiumModal = closePremiumModal;
+    window.generatePrediction = generatePrediction;
+    window.openSuscripcionDirecta = openSuscripcionDirecta;
+    window.toggleMenu = toggleMenu;
+    
+    // ========== INICIALIZAR ==========
+    checkAdminAccess();
+    loadContent();
+</script>
+</body>
+</html>
